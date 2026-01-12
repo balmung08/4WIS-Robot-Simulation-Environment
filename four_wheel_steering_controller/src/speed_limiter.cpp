@@ -6,10 +6,10 @@ namespace four_wheel_steering_controller
 {
 
   SpeedLimiter::SpeedLimiter(
-    bool has_velocity_limits,
-    bool has_acceleration_limits,
-    bool has_jerk_limits,
-    double min_velocity,
+    bool has_velocity_limits, // 是否启用速度上下限
+    bool has_acceleration_limits,  // 是否启用加速度上下限
+    bool has_jerk_limits,  // 是否启用加加速度上下限
+    double min_velocity, 
     double max_velocity,
     double min_acceleration,
     double max_acceleration,
@@ -28,6 +28,7 @@ namespace four_wheel_steering_controller
   {
   }
 
+  // 控制量限制函数总入口，串联三种限制。加加速度限制通常不启动
   double SpeedLimiter::limit(double& v, double v0, double v1, double dt)
   {
     const double tmp = v;
@@ -35,10 +36,12 @@ namespace four_wheel_steering_controller
     limit_jerk(v, v0, v1, dt);
     limit_acceleration(v, v0, dt);
     limit_velocity(v);
-
+    // 返回原本的速度被限制到的百分比，可能有用
     return tmp != 0.0 ? v / tmp : 1.0;
   }
 
+
+  // 限制速度 clip(v, vmin​, vmax​)，同样返回了比例
   double SpeedLimiter::limit_velocity(double& v)
   {
     const double tmp = v;
@@ -51,6 +54,7 @@ namespace four_wheel_steering_controller
     return tmp != 0.0 ? v / tmp : 1.0;
   }
 
+  // 从加速度角度上限制速度 v←v0+clip(v−v0​, Δvmin​, Δvmax​)
   double SpeedLimiter::limit_acceleration(double& v, double v0, double dt)
   {
     const double tmp = v;
@@ -68,6 +72,7 @@ namespace four_wheel_steering_controller
     return tmp != 0.0 ? v / tmp : 1.0;
   }
 
+  // 从加加速度角度上限制速度 v←v0​+dv0​+da
   double SpeedLimiter::limit_jerk(double& v, double v0, double v1, double dt)
   {
     const double tmp = v;

@@ -10,7 +10,6 @@ catkin_install_python(
     scripts/map_info.py
     scripts/map_tf.py
     scripts/map_transfer.py
-    scripts/joy_controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

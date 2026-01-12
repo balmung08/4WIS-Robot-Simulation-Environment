@@ -23,12 +23,6 @@ class JoyToCmdVel:
     def joy_cb(self, msg: Joy):
         twist = Twist()
 
-        # 急停
-        if msg.buttons[0] == 1:
-            self.pub.publish(Twist())
-            rospy.logwarn("Emergency stop!")
-            return
-
         # 左摇杆：前后
         forward = self.dz(msg.axes[1])
 

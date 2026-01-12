@@ -1,0 +1,13 @@
+<library path="lib/libmulti_mode_4ws_controller">
+  <class name="multi_mode_4ws_controller/MultiMode4WSController"
+         type="multi_mode_4ws_controller::MultiMode4WSController"
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      A multi-mode four wheel steering controller that supports:
+      - Mode 0: Ackermann steering (front-rear steering)
+      - Mode 1: Lateral translation (crab walk)
+      - Mode 2: Lateral Ackermann (sideways turning)
+      - Mode 3: Spin in place (zero-radius turning)
+    </description>
+  </class>
+</library>

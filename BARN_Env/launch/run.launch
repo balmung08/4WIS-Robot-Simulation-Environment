@@ -2,13 +2,13 @@
 
   <param name="use_sim_time" value="true"/>
 
-  <!-- 地图编号 -->
+  <!-- 地图编号选择，0-299 -->
   <arg name="map_id" default="1"/>
 
   <!-- 启动 Gazebo 仿真环境（世界 + 物理引擎 + GUI）-->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="paused"     value="false"/>   <arg name="use_sim_time" value="true"/>
-    <arg name="gui"        value="true"/>    <arg name="headless"   value="false"/>
+    <arg name="paused"     value="false"/>   <arg name="use_sim_time" value="false"/>
+    <arg name="gui"        value="true"/>    <arg name="headless"   value="true"/>
     <arg name="debug"      value="false"/>   
     <arg name="world_name" value="$(find BARN_Env)/source/world_files/world_$(arg map_id).world"/>
   </include>
@@ -30,24 +30,7 @@
     <param name="map_offset_y" value="0.15"/>
   </node>
 
-  <!-- ========== 手柄驱动节点 ========== -->
-  <node pkg="joy" type="joy_node" name="joy_node" output="screen">
-      <!-- 手柄设备 -->
-      <param name="dev" value="/dev/input/js0"/>
-      <!-- 发布频率 -->
-      <param name="autorepeat_rate" value="30.0"/>
-      <!-- 死区（可选） -->
-      <param name="deadzone" value="0.05"/>
-  </node>
 
-  <!-- ========== joy -> cmd_vel 节点 ========== -->
-  <node pkg="BARN_Env" type="joy_controller.py" name="joy_to_cmdvel" output="screen">
-      <remap from="joy" to="/joy"/>
-      <remap from="cmd_vel" to="robot_0/four_wheel_steering_controller/cmd_vel"/>
-      <param name="max_linear"  value="1.0"/>
-      <param name="max_angular" value="1.5"/>
-      <param name="deadzone"    value="0.05"/>
-  </node>
 
 </launch>
 

@@ -1,44 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="$(arg robot_name)" xmlns:xacro="http://wiki.ros.org/xacro">
 
-  <gazebo>
-    <disableFixedJointLumping>true</disableFixedJointLumping>
-  </gazebo>
-  <xacro:include filename="$(find 4WIS_Robot)/urdf/sensors/lidar_mount.xacro"/>
-  <xacro:include filename="$(find 4WIS_Robot)/urdf/sensors/lidar_gpu_ray.xacro"/>
-  <xacro:include filename="$(find 4WIS_Robot)/urdf/sensors/imu_mount.xacro"/>
-  <xacro:include filename="$(find 4WIS_Robot)/urdf/sensors/imu_sensor_gazebo.xacro"/>
-  <xacro:include filename="$(find 4WIS_Robot)/urdf/sensors/camera_mount.xacro"/>
-  <xacro:include filename="$(find 4WIS_Robot)/urdf/sensors/camera_sensor_gazebo.xacro"/>
-
-
   <xacro:property name="PI" value="3.1415926535897931"/>
   <xacro:property name="mesh_path" value="package://4WIS_Robot/meshes"/>
   
-  <xacro:property name="wheel_offset_x" value="0.32" /> 
-  <xacro:property name="wheel_offset_y" value="0.235" /> 
+  <xacro:property name="wheel_offset_x" value="0.32" /> <xacro:property name="wheel_offset_y" value="0.235" /> <xacro:property name="steer_limit" value="0.55" />
   
-  
-
-
+  <link name="base"/>
+  <joint name="base_joint" type="fixed">
+    <parent link="base"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.3" rpy="0 0 0"/>
+  </joint>
 
   <link name="base_link">
-    <!-- <inertial>
-      <origin xyz="0 -4.30552833609457E-17 0.05" rpy="0 0 0" />
+    <inertial>
+      <origin xyz="-0.00117586528514695 -4.30552833609457E-17 0.174335815287564" rpy="0 0 0" />
       <mass value="40.2533565247656" />
       <inertia ixx="1.311634309655" ixy="1.64735322115376E-16" ixz="0.0137789561118299"
                iyy="3.43401128074704" iyz="-1.3755764102141E-16" izz="3.79965514788602" />
-    </inertial> -->
-    <inertial>
-      <origin xyz="0 0 -0.1" rpy="0 0 0" />
-      <mass value="100.0" />
-      <inertia
-        ixx="3.2582"
-        ixy="4.0924E-16"
-        ixz="0.0342"
-        iyy="8.5288"
-        iyz="-3.4169E-16"
-        izz="9.4380" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -49,7 +29,7 @@
         <color rgba="0.392156862745098 0.384313725490196 1 1" />
       </material>
     </visual>
-    <collision >
+    <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <mesh filename="${mesh_path}/base_link.STL" />
@@ -57,16 +37,12 @@
     </collision>
   </link>
 
-  <gazebo reference="base_link">
-    <material>Gazebo/Blue</material>
-  </gazebo>
-  
   <xacro:macro name="wheel_assembly" params="prefix x_pos y_pos">
     
     <link name="${prefix}_steer_link">
       <inertial>
         <origin xyz="5.5511E-17 0 -0.088728" rpy="0 0 0" />
-        <mass value="25" />
+        <mass value="10" />
         <inertia ixx="0.047904" ixy="0" ixz="0" iyy="0.037562" iyz="0" izz="0.014192" />
       </inertial>
       <visual>
@@ -85,14 +61,13 @@
         </geometry>
       </collision>
     </link>
-  
+
     <joint name="${prefix}_steer_joint" type="revolute">
       <origin xyz="${x_pos} ${y_pos} -0.01" rpy="0 0 0" />
       <parent link="base_link" />
       <child link="${prefix}_steer_link" />
       <axis xyz="0 0 1" />
-      <limit lower="-1000" upper="1000" effort="1000" velocity="6.28" />
-      <!-- 硬性上将关节的范围设置较大满足平行模态需求。此外角速度设置大点，依靠控制器进行限速 -->
+      <limit lower="-${steer_limit}" upper="${steer_limit}" effort="100" velocity="1" />
     </joint>
 
     <link name="${prefix}_drive_link">
@@ -112,9 +87,9 @@
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <geometry>
-          <cylinder radius="0.13" length="0.05"/>
-        </geometry>
+          <geometry>
+            <cylinder radius="0.13" length="0.05"/>
+          </geometry>
       </collision>
     </link>
 
@@ -125,9 +100,13 @@
       <axis xyz="0 0 -1" />
     </joint>
 
+    <gazebo reference="${prefix}_steer_joint">
+      <dynamics damping="2.0" friction="1.0"/>
+    </gazebo>
+
     <gazebo reference="${prefix}_drive_link">
-      <mu1>1</mu1>
-      <mu2>1</mu2>
+      <mu1>1.0</mu1>
+      <mu2>1.0</mu2>
       <kp>100000.0</kp>
       <kd>10000.0</kd>
       <minDepth>0.001</minDepth>
@@ -163,79 +142,65 @@
   <xacro:wheel_assembly prefix="rl" x_pos="-${wheel_offset_x}" y_pos="${wheel_offset_y}" />
   <xacro:wheel_assembly prefix="rr" x_pos="-${wheel_offset_x}" y_pos="-${wheel_offset_y}" />
 
-
-  <!-- 雷达支柱 -->
-  <link name="lidar_pole_link">
+  <link name="lidar_link">
     <inertial>
-      <origin xyz="0 0 0.38" rpy="0 0 0" />
-      <mass value="2.0" />
-      <inertia ixx="0.027" ixy="0" ixz="0" 
-               iyy="0.027" iyz="0" 
-               izz="0.001" />
+      <origin xyz="-3.4211E-49 9.7454E-19 1.1102E-16" rpy="0 0 0" />
+      <mass value="0.3927" />
+      <inertia ixx="0.00032725" ixy="9.7388E-52" ixz="-6.1103E-36"
+               iyy="0.00032725" iyz="-3.3795E-35" izz="0.00049087" />
     </inertial>
     <visual>
-      <origin xyz="0 0 0.38" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.025" length="0.19"/>
+        <mesh filename="${mesh_path}/lidar_link.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.5 0.5 0.5 1" />
+        <color rgba="0 0 0 1" />
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 0.38" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.025" length="0.19"/>
+        <mesh filename="${mesh_path}/lidar_link.STL" />
       </geometry>
     </collision>
   </link>
 
-  <joint name="lidar_pole_joint" type="fixed">
-    <origin xyz="0.36 0 0.085" rpy="0 0 0" />
+  <joint name="lidar_joint" type="fixed">
+    <origin xyz="0 0 0.565" rpy="0 0 0" />
     <parent link="base_link" />
-    <child link="lidar_pole_link" />
+    <child link="lidar_link" />
   </joint>
 
-  <gazebo reference="lidar_pole_link">
-    <material>Gazebo/Grey</material>
-  </gazebo>
-  <!-- <xacro:lidar_mount parent="base_link" prefix="lidar" xyz="0.36 0 0.485" rpy="0 0 0"/>
-  <xacro:lidar_gpu_ray reference="lidar_link" prefix="lidar" topic="velodyne_points" frame="lidar_link"/> -->
-
-
-  <xacro:VLP-16 parent="base_link" name="lidar_link" topic="velodyne_points" organize_cloud="false" hz="40" collision_range="0.1" samples="440" gpu="true" min_range="0.01">
-        <origin xyz="0.36 0 0.47" rpy="0 0 0" />
-  </xacro:VLP-16>
-
-  <xacro:imu_mount parent="base_link" prefix="imu" xyz="0.36 0 0.555" rpy="0 0 0"/>
-  <xacro:imu_sensor_gazebo reference="imu_link" prefix="imu" topic="imu" frame="$(arg robot_name)/imu_link"/>
-
-  <xacro:camera_mount parent="base_link" prefix="camera" xyz="0.36 0 0.555" rpy="0 0 0"/>
-  <xacro:camera_sensor_gazebo reference="camera_link" camera_name="/camera" image_topic="image_raw"
-                              info_topic="camera_info" frame="$(arg robot_name)/camera_link"/>
-
-  <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-      <robotNamespace>/$(arg robot_name)</robotNamespace> 
-    </plugin>
-  </gazebo>
-
-  <gazebo reference="base_link">
-    <sensor name="base_collision_sensor" type="contact">
-      <always_on>true</always_on>
-      <update_rate>100.0</update_rate>
-      <contact>
-        <!-- 尝试这几种碰撞名称格式 -->
-        <collision>base_link_collision</collision>
-      </contact>
-      <plugin name="base_bumper_controller" filename="libgazebo_ros_bumper.so">
-        <bumperTopicName>/$(arg robot_name)/collision_states</bumperTopicName>
-        <frameName>base_link</frameName>
+  <gazebo reference="lidar_link">
+    <material>Gazebo/Black</material>
+    <sensor type="ray" name="lidar_sensor">
+      <update_rate>60.0</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <min_angle>0</min_angle>
+            <max_angle>6.28318</max_angle>
+            <samples>90</samples> 
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.15</min>
+          <max>8.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </ray>
+      <plugin name="gazebo_ros_lidar_controller" filename="libgazebo_ros_laser.so">
+        <topicName>scan</topicName>
+        <frameName>/$(arg robot_name)/lidar_link</frameName>
       </plugin>
     </sensor>
   </gazebo>
 
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/$(arg robot_name)</robotNamespace>
+    </plugin>
+  </gazebo>
+
 </robot>
-
-
-

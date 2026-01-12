@@ -1,4 +1,3 @@
-
 joint_state_controller:
   type: joint_state_controller/JointStateController
   publish_rate: 50
@@ -46,37 +45,37 @@ four_wheel_steering_controller:
       max_acceleration       : 3.14  # rad/s^2
       min_acceleration       : -3.14
 
-  /gazebo_ros_control:
-    pid_gains:
-      fl_steer_joint:
-        p: 50
-        i: 0.0
-        d: 0.01
-      fr_steer_joint:
-        p: 50
-        i: 0.0
-        d: 0.01
-      rl_steer_joint:
-        p: 50
-        i: 0.0
-        d: 0.01
-      rr_steer_joint:
-        p: 50
-        i: 0.0
-        d: 0.01
-      fl_drive_joint: 
-        p: 10.0
-        i: 0.0
-        d: 0.0
-      fr_drive_joint: 
-        p: 10.0
-        i: 0.0
-        d: 0.0
-      rl_drive_joint: 
-        p: 10.0
-        i: 0.0
-        d: 0.0
-      rr_drive_joint: 
-        p: 10.0
-        i: 0.0
-        d: 0.0
+  # /gazebo_ros_control:
+  #   pid_gains:
+  #     fl_steer_joint:
+  #       p: 50
+  #       i: 0.0
+  #       d: 0.01
+  #     fr_steer_joint:
+  #       p: 50
+  #       i: 0.0
+  #       d: 0.01
+  #     rl_steer_joint:
+  #       p: 50
+  #       i: 0.0
+  #       d: 0.01
+  #     rr_steer_joint:
+  #       p: 50
+  #       i: 0.0
+  #       d: 0.01
+  #     fl_drive_joint: 
+  #       p: 10.0
+  #       i: 0.0
+  #       d: 0.0
+  #     fr_drive_joint: 
+  #       p: 10.0
+  #       i: 0.0
+  #       d: 0.0
+  #     rl_drive_joint: 
+  #       p: 10.0
+  #       i: 0.0
+  #       d: 0.0
+  #     rr_drive_joint: 
+  #       p: 10.0
+  #       i: 0.0
+  #       d: 0.0

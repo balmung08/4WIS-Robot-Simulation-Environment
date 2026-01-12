@@ -1,0 +1,145 @@
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50
+
+multi_mode_4ws_controller:
+  type: "multi_mode_4ws_controller/MultiMode4WSController"
+  
+  # 车轮关节名称 (必须配置)
+  front_wheel: ['fl_drive_joint', 'fr_drive_joint']
+  rear_wheel: ['rl_drive_joint', 'rr_drive_joint']
+  
+  # 转向关节名称 (必须配置)
+  front_steering: ['fl_steer_joint', 'fr_steer_joint']
+  rear_steering: ['rl_steer_joint', 'rr_steer_joint']
+  
+  # 车辆几何参数 (必须配置，单位:米)
+  wheel_base: 0.64        # 轴距 (前后轴之间的距离)
+  track: 0.47             # 轮距 (左右轮之间的距离)
+  wheel_radius: 0.13     # 轮子半径
+  
+  # 发布频率 (Hz)
+  publish_rate: 50.0
+  
+  # 命令超时 (秒)
+  cmd_vel_timeout: 0.5
+
+
+  # 坐标系设置
+  base_frame_id: "base_link"
+  
+  # 里程计设置
+  enable_odom_tf: true                    # 是否发布TF变换
+  open_loop: false                        # 是否使用开环控制
+  velocity_rolling_window_size: 10        # 速度滤波窗口大小
+  
+  # 线速度限制
+  linear:
+    MODE_ACKERMANN:
+      x:
+        has_velocity_limits: true
+        max_velocity: 2.0                   # 最大前进速度 (m/s)
+        min_velocity: -2.0                  # 最大后退速度 (m/s)
+        has_acceleration_limits: true
+        max_acceleration: 5               # 最大加速度 (m/s²)
+        min_acceleration: -5              # 最大减速度 (m/s²)
+    MODE_LATERAL_ACKERMANN:
+      x:
+        has_velocity_limits: true
+        max_velocity: 2.0                   # 最大前进速度 (m/s)
+        min_velocity: -2.0                  # 最大后退速度 (m/s)
+        has_acceleration_limits: true
+        max_acceleration: 5               # 最大加速度 (m/s²)
+        min_acceleration: -5              # 最大减速度 (m/s²)
+    MODE_PARALLEL:
+      x:
+        has_velocity_limits: true
+        max_velocity: 2.0                   # 最大前进速度 (m/s)
+        min_velocity: -2.0                  # 最大后退速度 (m/s)
+        has_acceleration_limits: true
+        max_acceleration: 5              # 最大加速度 (m/s²)
+        min_acceleration: -5              # 最大减速度 (m/s²)
+    MODE_SPIN:
+      x:
+        has_velocity_limits: true
+        max_velocity: 2.0                   # 最大前进速度 (m/s)
+        min_velocity: -2.0                  # 最大后退速度 (m/s)
+        has_acceleration_limits: true
+        max_acceleration: 5               # 最大加速度 (m/s²)
+        min_acceleration: -5              # 最大减速度 (m/s²)
+    
+  #  转角限制
+  #  velocity其实是车轮转角，acceleration其实是车轮转角加速度
+  angular:
+    MODE_ACKERMANN:
+      z:
+        has_velocity_limits: true
+        max_velocity: 0.5233                  
+        min_velocity: -0.5233                 
+        has_acceleration_limits: true
+        max_acceleration: 314159              
+        min_acceleration: -314159              
+    MODE_LATERAL_ACKERMANN:
+      z:
+        has_velocity_limits: true
+        max_velocity: 0.3488                 
+        min_velocity: -0.3488                
+        has_acceleration_limits: true
+        max_acceleration: 3.14159              
+        min_acceleration: -3.14159             
+    MODE_PARALLEL:
+      z:
+        has_velocity_limits: true
+        max_velocity: 1000                  
+        min_velocity: -1000                
+        has_acceleration_limits: true
+        max_acceleration: 3.14159               
+        min_acceleration: -3.14159              
+    MODE_SPIN:
+        has_velocity_limits: false
+        has_acceleration_limits: false
+
+
+
+
+  # 里程计协方差 (顺序: x, y, z, roll, pitch, yaw)
+  pose_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 0.03]
+  twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 0.03]
+
+# rostopic pub -r 10 robot_0/multi_mode_4ws_controller/mode_select std_msgs/UInt8 "data: 0"
+# rostopic pub -r 10 robot_0/multi_mode_4ws_controller/cmd_vel geometry_msgs/Twist '{linear: {x: 0.02, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.8}}'
+
+# /robot_0/gazebo_ros_control:
+#   pid_gains:
+#     fl_steer_joint:
+#       p: 50
+#       i: 0.0
+#       d: 0.01
+#     fr_steer_joint:
+#       p: 50
+#       i: 0.0
+#       d: 0.01
+#     rl_steer_joint:
+#       p: 50
+#       i: 0.0
+#       d: 0.01
+#     rr_steer_joint:
+#       p: 50
+#       i: 0.0
+#       d: 0.01
+#     fl_drive_joint: 
+#       p: 10.0
+#       i: 0.0
+#       d: 0.0
+#     fr_drive_joint: 
+#       p: 10.0
+#       i: 0.0
+#       d: 0.0
+#     rl_drive_joint: 
+#       p: 10.0
+#       i: 0.0
+#       d: 0.0
+#     rr_drive_joint: 
+#       p: 10.0
+#       i: 0.0
+#       d: 0.0

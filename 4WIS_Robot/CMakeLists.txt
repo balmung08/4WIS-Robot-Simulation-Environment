@@ -54,6 +54,7 @@ catkin_install_python(
     scripts/pointcloud_filter.py
     scripts/collision_pub.py
     scripts/world_tf.py
+    scripts/joy_controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

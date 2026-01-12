@@ -51,6 +51,7 @@
 
     </link>
 
+
     <!-- Gazebo uses this material -->
     <gazebo reference="${prefix}_link">
       <material>Gazebo/DarkGrey</material>

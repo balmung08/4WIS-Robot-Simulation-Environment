@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Collision / SAFE 状态可视化（修复延迟和坐标问题）
+Collision / SAFE 状态可视化(修复时间倒退问题 - 使用Rate循环)
 """
 
 import rospy
@@ -16,9 +16,10 @@ class CollisionVisualizer:
     def __init__(self):
         rospy.init_node("collision_visualizer", anonymous=True)
 
-        self.robot_name = rospy.get_param("~robot_name", "car1")
+        self.robot_name = rospy.get_param("~robot_name", "robot_0")
         self.frame_id = rospy.get_param("~frame_id", "robot_0/base_link")
         self.text_height = rospy.get_param("~text_height", 0.8)
+        self.update_rate = rospy.get_param("~update_rate", 20.0)  # Hz
 
         self.marker_pub = rospy.Publisher(
             "/collision_marker", Marker, queue_size=5
@@ -42,8 +43,11 @@ class CollisionVisualizer:
         self.last_contacts = []
         self.last_msg_stamp = rospy.Time.now()
 
-        rospy.Timer(rospy.Duration(0.05), self.timer_callback)  # 提高更新频率
-        rospy.loginfo("Collision visualizer (fixed) started.")
+        # 使用Rate控制循环频率
+        self.rate = rospy.Rate(self.update_rate)
+        
+        rospy.loginfo("Collision visualizer started.")
+        rospy.loginfo(f"Update rate: {self.update_rate} Hz")
 
     # =====================================================
     def collision_callback(self, msg):
@@ -75,7 +79,7 @@ class CollisionVisualizer:
             # 获取从world到robot_frame的变换
             transform = self.tf_buffer.lookup_transform(
                 self.frame_id,
-                "world",  # 碰撞点通常在world坐标系
+                "world",
                 stamp,
                 rospy.Duration(0.02)
             )
@@ -87,7 +91,7 @@ class CollisionVisualizer:
                 point_stamped.header.frame_id = "world"
                 point_stamped.header.stamp = stamp
                 point_stamped.point = point
-                # 执行转换 - 使用正确的导入
+                # 执行转换
                 transformed = do_transform_point(point_stamped, transform)
                 transformed_points.append(transformed.point)
                 
@@ -95,21 +99,15 @@ class CollisionVisualizer:
                 tf2_ros.ConnectivityException, 
                 tf2_ros.ExtrapolationException) as e:
             rospy.logwarn_throttle(2.0, f"TF transform failed: {e}")
-            # 如果转换失败，直接使用原始点（作为fallback）
             return world_points
             
         return transformed_points
 
     # =====================================================
-    def timer_callback(self, _):
-        self.publish_text_marker()
-        self.publish_contact_points()
-
-    # =====================================================
     def publish_text_marker(self):
         m = Marker()
         m.header.frame_id = self.frame_id
-        m.header.stamp = self.last_msg_stamp  # 使用消息时间戳而非now()
+        m.header.stamp = rospy.Time.now()
         m.ns = "collision_status"
         m.id = 0
         m.type = Marker.TEXT_VIEW_FACING
@@ -121,7 +119,7 @@ class CollisionVisualizer:
         m.pose.orientation.w = 1.0
 
         m.scale.z = 0.25
-        m.lifetime = rospy.Duration(0.05)  # 稍微延长一点，防止闪烁
+        m.lifetime = rospy.Duration(0.2)
 
         if self.is_colliding:
             m.text = f"COLLISION"
@@ -135,19 +133,19 @@ class CollisionVisualizer:
             m.color.g = 0.9
             m.color.b = 0.1
             m.color.a = 0.9
+        
         self.marker_pub.publish(m)
 
     # =====================================================
     def publish_contact_points(self):
         marker = Marker()
         marker.header.frame_id = self.frame_id
-        marker.header.stamp = self.last_msg_stamp  # 使用消息时间戳
+        marker.header.stamp = rospy.Time.now()
         marker.ns = "collision_points"
         marker.id = 0
         marker.type = Marker.SPHERE_LIST
         marker.action = Marker.ADD
 
-        # 初始化姿态（必需）
         marker.pose.orientation.w = 1.0
 
         marker.scale.x = 0.15
@@ -159,24 +157,32 @@ class CollisionVisualizer:
         marker.color.b = 0.1
         marker.color.a = 1.0
 
-        marker.lifetime = rospy.Duration(0.05)
+        marker.lifetime = rospy.Duration(0.2)
 
-        # 只在有碰撞点时发布
         if self.last_contacts:
             marker.points = self.last_contacts
             self.marker_pub.publish(marker)
         else:
-            # 发布DELETE action清除旧的marker
             marker.action = Marker.DELETE
             self.marker_pub.publish(marker)
 
     # =====================================================
     def run(self):
-        rospy.spin()
+        while not rospy.is_shutdown():
+            try:
+                self.publish_text_marker()
+                self.publish_contact_points()
+                self.rate.sleep()
+            except rospy.exceptions.ROSTimeMovedBackwardsException:
+                rospy.logwarn("Time jumped backwards (Gazebo reset?), reinitializing rate...")
+                # 重新创建Rate对象
+                self.rate = rospy.Rate(self.update_rate)
+            except rospy.ROSInterruptException:
+                break
 
 
 if __name__ == "__main__":
     try:
         CollisionVisualizer().run()
-    except rospy.ROSInterruptException:
+    except rospy.ROSInterruptException as e:
         pass

@@ -1,28 +1,32 @@
 #include <four_wheel_steering_controller/odometry.h>
 
+/* 输入：四个轮子的角速度（fl, fr, rl, rr），前后轮转角（front_steering, rear_steering）
+输出：机器人位姿：x,y,θ，速度：vx，vy, w，平滑后的加速度、jerk、转向角速度
+*/
+
 namespace four_wheel_steering_controller
 {
   namespace bacc = boost::accumulators;
 
   Odometry::Odometry(size_t velocity_rolling_window_size)
-  : last_update_timestamp_(0.0)
+  : last_update_timestamp_(0.0)  //上一次update成功时的 ROS 时间戳
   , x_(0.0)
   , y_(0.0)
-  , heading_(0.0)
-  , linear_(0.0)
-  , linear_x_(0.0)
+  , heading_(0.0) // 里程计积分得到的位姿（世界系）
+  , linear_(0.0)  // 速度的模长，也就是标量速度
+  , linear_x_(0.0)  
   , linear_y_(0.0)
-  , angular_(0.0)
-  , steering_track_(0.0)
-  , wheel_steering_y_offset_(0.0)
-  , wheel_radius_(0.0)
-  , wheel_base_(0.0)
-  , wheel_old_pos_(0.0)
-  , velocity_rolling_window_size_(velocity_rolling_window_size)
-  , linear_accel_acc_(RollingWindow::window_size = velocity_rolling_window_size)
-  , linear_jerk_acc_(RollingWindow::window_size = velocity_rolling_window_size)
-  , front_steer_vel_acc_(RollingWindow::window_size = velocity_rolling_window_size)
-  , rear_steer_vel_acc_(RollingWindow::window_size = velocity_rolling_window_size)
+  , angular_(0.0) // 车体坐标系下的线速度与角速度
+  , steering_track_(0.0)  // 左右轮距
+  , wheel_steering_y_offset_(0.0) // 轮子接地点相对转向轴的横向偏置，通常为0
+  , wheel_radius_(0.0)  // 车轮半径
+  , wheel_base_(0.0)   // 前后轴距
+  , wheel_old_pos_(0.0)  // 没用
+  , velocity_rolling_window_size_(velocity_rolling_window_size) // 速度窗口大小，滤波用
+  , linear_accel_acc_(RollingWindow::window_size = velocity_rolling_window_size) // 加速度序列
+  , linear_jerk_acc_(RollingWindow::window_size = velocity_rolling_window_size) // 加加速度序列
+  , front_steer_vel_acc_(RollingWindow::window_size = velocity_rolling_window_size) // 前轮转角序列
+  , rear_steer_vel_acc_(RollingWindow::window_size = velocity_rolling_window_size) // 后轮转角序列
   {
   }
 

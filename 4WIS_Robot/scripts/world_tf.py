@@ -52,7 +52,7 @@ class GazeboWorldTF:
         pose = msg.pose[idx]
 
         now = rospy.Time.now()
-        if now - self.last_pub_time < self.min_dt:
+        if abs(now - self.last_pub_time) < self.min_dt:
             return
 
         t = geometry_msgs.msg.TransformStamped()

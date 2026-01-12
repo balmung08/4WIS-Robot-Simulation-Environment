@@ -17,6 +17,7 @@ namespace four_wheel_steering_controller{
     , base_frame_id_("base_link")
     , enable_odom_tf_(true)
     , enable_twist_cmd_(true)
+    
   {
   }
 
@@ -414,16 +415,20 @@ namespace four_wheel_steering_controller{
         front_left_steering = -delta_far;
         front_right_steering = -delta_near;
       }
-          
+      
       if(abs(curr_cmd_twist.ang) < 1e-4)
       {
         vel_left_front = vel_right_front = vel_left_rear = vel_right_rear = curr_cmd_twist.lin_x / wheel_radius_;
         front_left_steering = front_right_steering = rear_left_steering = rear_right_steering = 0.0;
       }
+      
       vel_left_rear = vel_left_front;
       vel_right_rear = vel_right_front;
       rear_left_steering = -front_left_steering;
       rear_right_steering = -front_right_steering;
+      
+      // ROS_INFO_STREAM("OUT"<<vel_left_rear << "  "  << vel_right_rear << "  " <<  rear_left_steering << "  " << rear_right_steering);
+      // ROS_INFO_STREAM("OUT"<<rear_left_steering << "  "  << vel_right_rear << "  " <<  rear_left_steering << "  " << rear_right_steering);
     }
     // 修改>
     else
