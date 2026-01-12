@@ -35,6 +35,7 @@ sudo apt install ros-noetic-image-transport
 sudo apt install ros-noetic-cv-bridge
 sudo apt install ros-noetic-urdf-geometry-parser
 sudo apt install ros-noetic-four-wheel-steering-msgs
+sudo apt install ros-noetic-joy
 ```
 
 ---
@@ -205,6 +206,7 @@ sudo apt install ros-noetic-image-transport
 sudo apt install ros-noetic-cv-bridge
 sudo apt install ros-noetic-urdf-geometry-parser
 sudo apt install ros-noetic-four-wheel-steering-msgs
+sudo apt install ros-noetic-joy
 ```
 
 ---
