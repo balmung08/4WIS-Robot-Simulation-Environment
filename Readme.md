@@ -36,6 +36,14 @@ sudo apt install ros-noetic-cv-bridge
 sudo apt install ros-noetic-urdf-geometry-parser
 sudo apt install ros-noetic-four-wheel-steering-msgs
 sudo apt install ros-noetic-joy
+sudo apt install ros-noetic-velodyne-gazebo-plugins
+sudo apt install ros-noetic-velodyne-simulator
+sudo apt install ros-noetic-velodyne-description
+sudo apt install ros-noetic-ros-numpy
+sudo apt install ros-noetic-tf2-ros
+sudo apt install ros-noetic-tf2-sensor-msgs
+sudo apt install ros-noetic-std-msgs
+sudo apt install ros-noetic-map-server
 ```
 
 ---
@@ -207,6 +215,14 @@ sudo apt install ros-noetic-cv-bridge
 sudo apt install ros-noetic-urdf-geometry-parser
 sudo apt install ros-noetic-four-wheel-steering-msgs
 sudo apt install ros-noetic-joy
+sudo apt install ros-noetic-velodyne-gazebo-plugins
+sudo apt install ros-noetic-velodyne-simulator
+sudo apt install ros-noetic-velodyne-description
+sudo apt install ros-noetic-ros-numpy
+sudo apt install ros-noetic-tf2-ros
+sudo apt install ros-noetic-tf2-sensor-msgs
+sudo apt install ros-noetic-std-msgs
+sudo apt install ros-noetic-map-server
 ```
 
 ---
