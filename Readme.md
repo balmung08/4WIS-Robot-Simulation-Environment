@@ -155,6 +155,7 @@ runlaunch BARN_Env run.launch
 * Directly using wheel STL models as Gazebo collision bodies may result in discontinuous or unstable motion.
   This is likely due to poor compatibility between STL meshes and Gazebo’s collision detection.
   In this work, the issue is mitigated by manually defining simplified collision geometries
+* The timestamps of the topics published by each node and the coordinate transformations must be aligned.
 
 ---
 
@@ -321,6 +322,7 @@ runlaunch BARN_Env run.launch
 * BARN 数据集中的 `map` 与 `world` 文件在Y 轴方向存在栅格偏移误差，已在 `world → map` 的坐标变换节点中进行修正
 * 若在未完全静止状态下进行模态切换，可能导致运动不稳定，在高速情况下甚至存在侧翻风险。为保证安全性，建议在模态切换前先将线速度降至 0
 * 若直接使用车轮 STL 模型作为 Gazebo 碰撞体，会出现运动不连续或不平滑的问题。推测原因是 STL 与 Gazebo 碰撞检测的兼容性较差，当前采用手动构建碰撞体积的方式进行规避
+* 各个节点发布的话题与坐标变换的时间戳一定要对齐
 
 ---
 
